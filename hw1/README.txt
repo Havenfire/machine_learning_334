@@ -3,4 +3,4 @@ WRITTEN BY OTHER STUDENTS OR LARGE LANGUAGE MODELS SUCH AS CHATGPT.
 Blake Liu */
 
 I collaborated with the following classmates for this homework:
-<n/a>
+Jake Brown

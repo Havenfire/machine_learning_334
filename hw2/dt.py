@@ -23,6 +23,8 @@ def calculate_split_score(y, criterion):
         The gini or entropy associated with a node
     """
 
+
+
     values, counts = np.unique(y, return_counts=True)
     total_counts = len(y)
     if criterion == "gini":
@@ -125,26 +127,34 @@ class DecisionTree(object):
         if calculate_split_score(current_node.data[:, -1], self.criterion) == 0:
             return
 
+        y_values = current_node.data[:, -1]
+        if len(np.unique(y_values)) == 1:  # All labels are the same
+            return
+        
         best_split_location = None
-        best_split_value = 2
+        best_split_value = float('inf')
         left_data = None
         right_data = None
 
-        for column in range(0, current_node.data.shape[1]):
-            for row in range(0, current_node.data.shape[0]):
 
-                left_data = current_node.data[current_node.data[:, column] < row]
-                right_data = current_node.data[current_node.data[:, column] >= row]
+        #finding best split condition
+        for column in range(0, current_node.data.shape[1] - 1):
+            for row in range(0, current_node.data.shape[0]):
+                left_data = current_node.data[current_node.data[:, column] < current_node.data[row, column]]
+                right_data = current_node.data[current_node.data[:, column] >= current_node.data[row, column]]
+
                 split_value_left = calculate_split_score(left_data[:, -1], self.criterion)
                 split_value_right = calculate_split_score(right_data[:, -1], self.criterion)
-                #MAYBE IF THIS IS ZERO DON"T RECURSE DOWN AGAIN?
 
-                if split_value_left < best_split_value or split_value_right < best_split_value and left_data.size < self.minLeafSample and right_data.size < self.minLeafSample:
-                    best_split_location = (column, row)
-                    best_split_value = min(split_value_left, split_value_right, best_split_value)
-
+                current_split_value = split_value_left * len(left_data) / len(current_node.data) + split_value_right * len(right_data) / len(current_node.data)
+                
+                if (current_split_value < best_split_value):
+                    best_split_location = (column, current_node.data[row, column])
+                    best_split_value = current_split_value
+        # print(best_split_location)
+        
         left_data = current_node.data[current_node.data[:,best_split_location[0]] < best_split_location[1]]
-        right_data = current_node.data[current_node.data[:,best_split_location[0]] > best_split_location[1]]
+        right_data = current_node.data[current_node.data[:,best_split_location[0]] >= best_split_location[1]]
 
         current_node.set_split_point(best_split_location)
 
@@ -169,10 +179,10 @@ class DecisionTree(object):
         yHat : numpy.1d array with shape m
             Predicted class label per sample
         """
-        yHat = np.empty(xFeat.shape[0])  # variable to store the estimated class label
+        yHat = np.array([])  # variable to store the estimated class label
 
-        for index, row in xFeat:
-            yHat[index] =  self.predict_recursion(xFeat[row], self.root_node)
+        for row in range(0, xFeat.shape[0]):
+            yHat = np.append(yHat, self.predict_recursion(xFeat[row], self.root_node))
 
         return yHat
     

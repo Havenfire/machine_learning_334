@@ -36,7 +36,8 @@ def holdout(model, xFeat, y, testSize):
     startTime = time.time()
 
     # remember to change to random_state = NONE
-    xTrain, xTest, yTrain, yTest = ms.train_test_split(xFeat, y, test_size=testSize, random_state=None)
+    xTrain, xTest, yTrain, yTest = ms.train_test_split(
+        xFeat, y, test_size=testSize, random_state=None)
 
     model.fit(xTrain, yTrain)
 
@@ -80,35 +81,32 @@ def kfold_cv(model, xFeat, y, k):
     timeElapsed: float
         Time it took to run this function
     """
-    
+
     startTime = time.time()
 
     total_train_auc = 0
     total_test_auc = 0
-    
+
     kf = ms.KFold(n_splits=k)
 
     for train_index, test_index in kf.split(xFeat):
         xTrain, xTest = xFeat[train_index], xFeat[test_index]
         yTrain, yTest = y[train_index], y[test_index]
 
-        
         model.fit(xTrain, yTrain)
-  
+
         trainPredictions = model.predict_proba(xTrain)[:, 1]
         testPredictions = model.predict_proba(xTest)[:, 1]
 
         trainAuc = roc_auc_score(yTrain, trainPredictions)
         testAuc = roc_auc_score(yTest, testPredictions)
 
-
-        
         total_train_auc += trainAuc
         total_test_auc += testAuc
 
     avg_train_auc = total_train_auc / k
     avg_test_auc = total_test_auc / k
-    
+
     endTime = time.time()
     timeElapsed = endTime - startTime
 
@@ -153,17 +151,17 @@ def mc_cv(model, xFeat, y, testSize, s):
     cumulated_time = 0
     cumulated_train_auc = 0
     cumulated_test_auc = 0
-    
-    
+
     start_time = time.time()
 
     for i in range(0, s):
         # Split the data into train and test sets
-        xTrain, xTest, yTrain, yTest = ms.train_test_split(xFeat, y, test_size=testSize)
+        xTrain, xTest, yTrain, yTest = ms.train_test_split(
+            xFeat, y, test_size=testSize)
 
         # Train the model on the training data
         model.fit(xTrain, yTrain)
-        
+
         # Make predictions on training and test data
         yTrainPred = model.predict_proba(xTrain)[:, 1]
         yTestPred = model.predict_proba(xTest)[:, 1]
@@ -173,7 +171,6 @@ def mc_cv(model, xFeat, y, testSize, s):
         cumulated_test_auc += roc_auc_score(yTest, yTestPred)
 
     end_time = time.time()
-
 
     # Calculate average AUC and time elapsed
     avg_train_auc = cumulated_train_auc / s

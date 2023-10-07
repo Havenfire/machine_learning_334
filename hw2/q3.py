@@ -3,10 +3,39 @@ import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import time
 import sklearn.model_selection as ms
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 
+def accuracy(yHat, yTrue):
+    """
+    Calculate the accuracy of the prediction
+
+    Parameters
+    ----------
+    yHat : 1d-array with shape n
+        Predicted class label for n samples
+    yTrue : 1d-array with shape n
+        True labels associated with the n samples
+
+    Returns
+    -------
+    acc : float between [0,1]
+        The accuracy of the model
+    """
+    # TODO calculate the accuracy
+    acc = 0
+    correct = 0
+
+    for val, val2 in zip(yHat, yTrue):
+        if val == val2:
+            correct += 1
+
+    acc = correct / len(yHat)
+
+    return acc
 
 def kfold_cv(model, xFeat, y, k):
     """
@@ -136,31 +165,55 @@ def main():
     yTrain = pd.read_csv(args.yTrain).to_numpy().flatten()
     xTest = pd.read_csv(args.xTest).to_numpy()
     yTest = pd.read_csv(args.yTest).to_numpy().flatten()
-    # create the decision tree classifier
-    dtClass = DecisionTreeClassifier(max_depth=15,
-                                     min_samples_leaf=10)
-    # use the holdout set with a validation size of 30 of training
-    # aucTrain1, aucVal1, time1 = holdout(dtClass, xTrain, yTrain, 0.30)
-    # use 2-fold validation
-    aucTrain2, aucVal2, time2 = kfold_cv(dtClass, xTrain, yTrain, 2)
+
+    #hyper-paramters
+    dtClass_original = DecisionTreeClassifier(max_depth=5, min_samples_leaf=5)
+    dtClass_5_percent_removed = DecisionTreeClassifier(max_depth=5, min_samples_leaf=5)
+    dtClass_10_percent_removed = DecisionTreeClassifier(max_depth=5, min_samples_leaf=5)
+    dtClass_20_percent_removed = DecisionTreeClassifier(max_depth=5, min_samples_leaf=5)
+
     # use 5-fold validation
-    aucTrain3, aucVal3, time3 = kfold_cv(dtClass, xTrain, yTrain, 5)
-    # use 10-fold validation
-    aucTrain4, aucVal4, time4 = kfold_cv(dtClass, xTrain, yTrain, 10)
-    # use MCCV with 5 samples
-    # aucTrain5, aucVal5, time5 = mc_cv(dtClass, xTrain, yTrain, 0.30, 5)
-    # # use MCCV with 10 samples
-    # aucTrain6, aucVal6, time6 = mc_cv(dtClass, xTrain, yTrain, 0.30, 10)
-    # train it using all the data and assess the true value
-    trainAuc, testAuc = sktree_train_test(
-        dtClass, xTrain, yTrain, xTest, yTest)
-    perfDF = pd.DataFrame([
-                           ['2-fold', aucTrain2, aucVal2, time2],
-                           ['5-fold', aucTrain3, aucVal3, time3],
-                           ['10-fold', aucTrain4, aucVal4, time4],
+
+    KnnClass = KNeighborsClassifier(n_neighbors = 6)
+
+    aucTrain_original, aucVal_original, time_original = kfold_cv(KnnClass, xTrain, yTrain, 5)
+    xTrain_100, xTest_100, yTrain_100, yTest_100 = train_test_split(xTrain, yTrain, random_state=None)
+
+    xTrain_95, _, yTrain_95, yTest_95 = train_test_split(xTrain, yTrain, test_size=0.05, random_state=None)
 
 
-                           ['True Test', trainAuc, testAuc, 0]],
+    aucTrain_95, aucVal_95, time_95 = kfold_cv(KnnClass, xTrain_95, yTrain_95, 5)
+
+    xTrain_90, _, yTrain_90, yTest_90 = train_test_split(xTrain, yTrain, test_size=0.10, random_state=None)
+
+    aucTrain_90, aucVal_90, time_90 = kfold_cv(KnnClass, xTrain_90, yTrain_90, 5)
+
+    xTrain_80, X, yTrain_80, yTest_80 = train_test_split(xTrain, yTrain, test_size=0.20, random_state=None)
+
+
+
+    aucTrain_80, aucVal_80, time_80 = kfold_cv(KnnClass, xTrain_80, yTrain_80, 5)
+
+
+    trainAuc_original, testAuc_original = sktree_train_test(dtClass_original, xTrain, yTrain, xTest, yTest)
+
+    score = dtClass_original.score(X, yTest_80)
+    print(score)
+
+    trainAuc_5_percent_removed, testAuc_5_percent_removed = sktree_train_test(dtClass_5_percent_removed, xTrain_95, yTrain_95, xTest, yTest)
+    trainAuc_10_percent_removed, testAuc_10_percent_removed = sktree_train_test(dtClass_10_percent_removed, xTrain_90, yTrain_90, xTest, yTest)
+    trainAuc_20_percent_removed, testAuc_20_percent_removed = sktree_train_test(dtClass_20_percent_removed, xTrain_80, yTrain_80, xTest, yTest)
+
+
+    perfDF = pd.DataFrame([ ['KNN', aucTrain_original, aucVal_original, time_original],
+                            ['KNN-95', aucTrain_95, aucVal_95, time_95],
+                            ['KNN-90', aucTrain_90, aucVal_90, time_90],
+                            ['KNN-80', aucTrain_80, aucVal_80, time_80],
+
+                            ['DT Original', trainAuc_original, testAuc_original, 0],
+                            ['DT 5 removed', trainAuc_5_percent_removed, testAuc_5_percent_removed, 0],
+                            ['DT 10 removed', trainAuc_10_percent_removed, testAuc_10_percent_removed, 0],
+                            ['DT 20 removed', trainAuc_20_percent_removed, testAuc_20_percent_removed, 0]],
                           columns=['Strategy', 'TrainAUC', 'ValAUC', 'Time'])
     print(perfDF)
 

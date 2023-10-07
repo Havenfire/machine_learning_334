@@ -123,16 +123,16 @@ def main():
                         type=int,
                         help="the number of neighbors")
     parser.add_argument("--xTrain",
-                        default="q3xTrain.csv",
+                        default="q4xTrain.csv",
                         help="filename for features of the training data")
     parser.add_argument("--yTrain",
-                        default="q3yTrain.csv",
+                        default="q4yTrain.csv",
                         help="filename for labels associated with training data")
     parser.add_argument("--xTest",
-                        default="q3xTest.csv",
+                        default="q4xTest.csv",
                         help="filename for features of the test data")
     parser.add_argument("--yTest",
-                        default="q3yTest.csv",
+                        default="q4yTest.csv",
                         help="filename for labels associated with the test data")
 
     args = parser.parse_args()
