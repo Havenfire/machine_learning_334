@@ -1,8 +1,9 @@
 import argparse
 import numpy as np
 import pandas as pd
-
-
+from scipy import stats 
+import seaborn as sn 
+import matplotlib.pyplot as plt 
 
 def extract_features(df):
     """
@@ -25,10 +26,7 @@ def extract_features(df):
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
     df['day_of_week'] = df['date'].dt.dayofweek    
-    df=df.assign(session=pd.cut(df.Time.dt.hour,
-                            [0,6,12,18,23],
-                            labels=['Night','Morning','Afternoon','Evening'],
-                            include_lowest=True))    
+    df['hour'] = df['date'].dt.hour
     
     df = df.drop(columns=['date'])
 
@@ -37,21 +35,38 @@ def extract_features(df):
 
 def cal_corr(df):
     """
-    Given a pandas dataframe (include the target variable at the last column), 
+    Given a pandas dataframe (include the target variable at the last column),
     calculate the correlation matrix (compute pairwise correlation of columns)
 
     Parameters
     ----------
     df : pandas dataframe
-        Training or test data (with target variable)
+        Training or test data (with the target variable)
     Returns
     -------
     corrMat : pandas dataframe
         Correlation matrix
     """
-    # TODO
-    # calculate the correlation matrix and perform the heatmap
-    corrMat = None 
+    # Create an empty list to store correlation values
+    corrMat_list = []
+
+    # Iterate through the columns of the dataframe
+    for col1 in df.columns:
+        row = []
+        for col2 in df.columns:
+            # Calculate the Pearson correlation coefficient
+            corr = stats.pearsonr(df[col1], df[col2]).correlation
+            row.append(corr)
+
+        corrMat_list.append(row)
+
+    # Create a new dataframe using the correlation values and column names
+    corrMat = pd.DataFrame(corrMat_list, columns=df.columns)
+
+    # Plot the correlation matrix as a heatmap
+    hm = sn.heatmap(data=corrMat)
+    plt.show()
+
     return corrMat
 
 
@@ -112,15 +127,30 @@ def main():
                         default="eng_xTest.csv",
                         help="filename of the test data")
     args = parser.parse_args()
+    # # load the train and test data
+    # xTrain = pd.read_csv(args.trainFile)
+    # xTest = pd.read_csv(args.testFile)
+    # # extract the new features
+    # xNewTrain = extract_features(xTrain)
+    # xNewTest = extract_features(xTest)
+    # # select the features
+    # xNewTrain = select_features(xNewTrain)
+    # xNewTest = select_features(xNewTest)
+    # # preprocess the data
+    # xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
+    # # save it to csv
+    # xTrainTr.to_csv(args.outTrain, index=False)
+    # xTestTr.to_csv(args.outTest, index=False)
+
     # load the train and test data
     xTrain = pd.read_csv(args.trainFile)
     xTest = pd.read_csv(args.testFile)
-    # extract the new features
-    xNewTrain = extract_features(xTrain)
-    xNewTest = extract_features(xTest)
+    # # extract the new features
+    # xNewTrain = extract_features(xTrain)
+    # xNewTest = extract_features(xTest)
     # select the features
-    xNewTrain = select_features(xNewTrain)
-    xNewTest = select_features(xNewTest)
+    xNewTrain = select_features(xTrain)
+    xNewTest = select_features(xTest)
     # preprocess the data
     xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
     # save it to csv
