@@ -127,35 +127,35 @@ def main():
                         default="eng_xTest.csv",
                         help="filename of the test data")
     args = parser.parse_args()
-    # # load the train and test data
-    # xTrain = pd.read_csv(args.trainFile)
-    # xTest = pd.read_csv(args.testFile)
-    # # extract the new features
-    # xNewTrain = extract_features(xTrain)
-    # xNewTest = extract_features(xTest)
-    # # select the features
-    # xNewTrain = select_features(xNewTrain)
-    # xNewTest = select_features(xNewTest)
-    # # preprocess the data
-    # xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
-    # # save it to csv
-    # xTrainTr.to_csv(args.outTrain, index=False)
-    # xTestTr.to_csv(args.outTest, index=False)
-
     # load the train and test data
     xTrain = pd.read_csv(args.trainFile)
     xTest = pd.read_csv(args.testFile)
-    # # extract the new features
-    # xNewTrain = extract_features(xTrain)
-    # xNewTest = extract_features(xTest)
+    # extract the new features
+    xNewTrain = extract_features(xTrain)
+    xNewTest = extract_features(xTest)
     # select the features
-    xNewTrain = select_features(xTrain)
-    xNewTest = select_features(xTest)
+    xNewTrain = select_features(xNewTrain)
+    xNewTest = select_features(xNewTest)
     # preprocess the data
     xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
     # save it to csv
     xTrainTr.to_csv(args.outTrain, index=False)
     xTestTr.to_csv(args.outTest, index=False)
+
+    # # load the train and test data
+    # xTrain = pd.read_csv(args.trainFile)
+    # xTest = pd.read_csv(args.testFile)
+    # # # extract the new features
+    # # xNewTrain = extract_features(xTrain)
+    # # xNewTest = extract_features(xTest)
+    # # select the features
+    # xNewTrain = select_features(xTrain)
+    # xNewTest = select_features(xTest)
+    # # preprocess the data
+    # xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
+    # # save it to csv
+    # xTrainTr.to_csv(args.outTrain, index=False)
+    # xTestTr.to_csv(args.outTest, index=False)
 
 
 if __name__ == "__main__":
