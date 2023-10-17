@@ -106,8 +106,11 @@ def preprocess_data(trainDF, testDF):
         The preprocessed testing data
     """
 
-    normalized_trainDF=(trainDF-trainDF.mean())/trainDF.std()
-    normalized_testDF=(testDF-testDF.mean())/testDF.std()
+    mean = trainDF.mean()
+    std = trainDF.std()
+
+    normalized_trainDF = (trainDF - mean) / std
+    normalized_testDF = (testDF - mean) / std
 
 
     return normalized_trainDF, normalized_testDF
@@ -136,11 +139,14 @@ def main():
     # extract the new features
     xNewTrain = extract_features(xTrain)
     xNewTest = extract_features(xTest)
+    
     # select the features
     xNewTrain = select_features(xNewTrain)
     xNewTest = select_features(xNewTest)
+
     # preprocess the data
     xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
+
     # save it to csv
     xTrainTr.to_csv(args.outTrain, index=False)
     xTestTr.to_csv(args.outTest, index=False)
