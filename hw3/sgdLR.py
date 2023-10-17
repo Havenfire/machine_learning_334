@@ -22,7 +22,12 @@ def grad_pt(beta, xi, yi):
     -------
         grad : 1d array with shape d
     """
-    return 0
+
+    #what the model thinks the hypothesis should be
+    h = np.dot(xi, beta)
+    #calculates which direction to shift the model to the target
+    grad = np.dot(xi.transpose(), (h - yi))
+    return grad
 
 
 class SgdLR(LinearRegression):
@@ -39,8 +44,41 @@ class SgdLR(LinearRegression):
         """
         See definition in LinearRegression class
         """
-        trainStats = {}
         # TODO: DO SGD
+        
+        n_samples, n_features = xTrain.shape
+        self.beta = np.zeros(n_features)  # Initialize beta with zeros
+        total_iterations = 0
+
+        trainStats = {}
+        batch_num = n_samples // self.bs
+        start = time.time()
+
+        for epoch in range(1, self.mEpoch + 1):
+            indices = np.arange(n_samples)
+            np.random.shuffle(indices)
+            xTrain_shuffled = xTrain[indices]
+            yTrain_shuffled = yTrain[indices]
+
+            for batch in range(batch_num): 
+                start = batch * self.bs
+                end = (batch + 1) * self.bs
+                xi = xTrain_shuffled[start:end]
+                yi = yTrain_shuffled[start:end]
+
+                self.beta = grad_pt(self.beta, xi, yi)
+                
+                total_iterations += 1
+            end = time.time()
+
+            # print(xTrain, "\n\n", yTrain)
+            # print(xTrain.shape, "\n\n", yTrain.shape)
+            trainStats[total_iterations] = {
+                'time': end - start, 
+                'train-mse': self.mse(xTrain, yTrain),
+                'test-mse': self.mse(xTest, yTest)
+            }
+
         return trainStats
 
 

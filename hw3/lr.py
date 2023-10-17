@@ -46,6 +46,9 @@ class LinearRegression(ABC):
         yHat : 1d array or list with shape m
             Predicted response per sample
         """
+
+        #PROBLEM IS IN BETA
+        print(self.beta, xFeat)
         yHat = xFeat.dot(self.beta)
 
         return yHat
@@ -53,6 +56,8 @@ class LinearRegression(ABC):
     def mse(self, xFeat, y):
         """
         """
+
+
         yHat = self.predict(xFeat)
         return mean_squared_error(y, yHat)
 

@@ -24,9 +24,9 @@ class StandardLR(LinearRegression):
 
         test_mse = self.mse(xTest, yTest)
         trainStats[0] = {
-            "time_elapsed": end_time - start_time,
-            "train_mse": train_mse,
-            "test_mse": test_mse
+            "time": end_time - start_time,
+            "train-mse": train_mse,
+            "test-mse": test_mse
         }
 
         return trainStats
