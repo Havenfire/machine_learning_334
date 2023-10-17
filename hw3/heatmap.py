@@ -20,7 +20,14 @@ def cal_corr(df):
         Correlation matrix
     """
     # Create an empty list to store correlation values
+
+
+
+    something = ['T3', 'T4', 'T5', 'T7', 'T8', 'T9', 'T_out', 'Tdewpoint', 'RH_6', 'RH_2', 'RH_3', 'RH_4', 'RH_7', 'RH_8', 'RH_9', 'year', 'Visibility']
+    df.drop(something, inplace = True, axis = 0)
+    df.drop(something, inplace = True, axis = 1)
     corrMat_list = []
+
 
     # Iterate through the columns of the dataframe
     for col1 in df.columns:
@@ -28,23 +35,21 @@ def cal_corr(df):
         for col2 in df.columns:
             # Calculate the Pearson correlation coefficient
             corr = stats.pearsonr(df[col1], df[col2]).correlation
-            if corr >=.5:
-                row.append(1)
-            elif corr <= -.5:
-                row.append(-1)
-            else:        
-                row.append(0)
-
+            row.append(corr)
 
         corrMat_list.append(row)
 
     # Create a new dataframe using the correlation values and column names
     corrMat = pd.DataFrame(corrMat_list, columns=df.columns)
-
+    corrMat = corrMat.set_index(corrMat.columns)
+    corrMat = corrMat.reindex(sorted(corrMat.columns), axis=1)
+    corrMat = corrMat.sort_index()
+    
+    
     # Plot the correlation matrix as a heatmap
     plt.subplots(figsize=(20,20))
 
-    hm = sn.heatmap(data=corrMat,  cmap=sn.diverging_palette(20, 220, n=200),)
+    hm = sn.heatmap(data=corrMat,  cmap=sn.diverging_palette(20, 220, n=200), vmin=-1, vmax=1)
     plt.show()
 
     return corrMat

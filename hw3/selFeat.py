@@ -4,6 +4,7 @@ import pandas as pd
 from scipy import stats 
 import seaborn as sn 
 import matplotlib.pyplot as plt 
+from sklearn import preprocessing
 
 def extract_features(df):
     """
@@ -66,7 +67,7 @@ def cal_corr(df):
     return corrMat
 
 
-#combine all values that are highly correlated
+#remove all values that are highly correlated
 def select_features(df):
     """
     Select the features to keep based on correlation with a threshold
@@ -81,18 +82,9 @@ def select_features(df):
     """
 
     # Calculate the correlation matrix
-    correlation_value = cal_corr(df)
+    features_to_remove = ['T3', 'T4', 'T5', 'T7', 'T8', 'T9', 'T_out', 'Tdewpoint', 'RH_6', 'RH_2', 'RH_3', 'RH_4', 'RH_7', 'RH_8', 'RH_9', 'year', 'Visibility']
+    df.drop(features_to_remove, inplace = True, axis = 1)
 
-    keep_columns = set(df.columns)
-
-    for val1 in df.columns.values:
-        for val2 in df.columns.values:
-            if val1 != val2:
-                if correlation_value.at[val1, val2] >=.5:
-                    df.drop([val2], axis = 1, inplace = True)
-                elif correlation_value.at[val1, val2] <= -.5:
-                    df.drop([val2], axis = 1, inplace = True)
-    print(df.columns.values)
     return df
 
 
@@ -113,8 +105,12 @@ def preprocess_data(trainDF, testDF):
     testDF : pandas dataframe
         The preprocessed testing data
     """
-    # TODO do something
-    return trainDF, testDF
+
+    normalized_trainDF=(trainDF-trainDF.mean())/trainDF.std()
+    normalized_testDF=(testDF-testDF.mean())/testDF.std()
+
+
+    return normalized_trainDF, normalized_testDF
 
 
 def main():
