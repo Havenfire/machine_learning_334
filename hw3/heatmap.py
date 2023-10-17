@@ -28,7 +28,13 @@ def cal_corr(df):
         for col2 in df.columns:
             # Calculate the Pearson correlation coefficient
             corr = stats.pearsonr(df[col1], df[col2]).correlation
-            row.append(corr)
+            if corr >=.5:
+                row.append(1)
+            elif corr <= -.5:
+                row.append(-1)
+            else:        
+                row.append(0)
+
 
         corrMat_list.append(row)
 
@@ -38,8 +44,7 @@ def cal_corr(df):
     # Plot the correlation matrix as a heatmap
     plt.subplots(figsize=(20,20))
 
-    hm = sn.heatmap(data=corrMat,  cmap=sn.diverging_palette(20, 220, n=200),
-)
+    hm = sn.heatmap(data=corrMat,  cmap=sn.diverging_palette(20, 220, n=200),)
     plt.show()
 
     return corrMat
@@ -52,7 +57,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("outTrain", help="filename of the updated training data")
     parser.add_argument("outTest", help="filename of the updated test data")
-    parser.add_argument("--trainFile", default="eng_xTrain.csv", help="filename of the training data")
+    parser.add_argument("--trainFile", default="new_xTrain.csv", help="filename of the training data")
     parser.add_argument("--yFile", default="eng_yTrain.csv", help="filename of the test data")
     args = parser.parse_args()
 
@@ -60,6 +65,7 @@ def main():
     xTrain = pd.read_csv(args.trainFile)
     yTrain = pd.read_csv(args.yFile)
     vertical_concat = pd.concat([xTrain, yTrain], axis=1)
+    print(vertical_concat.head())
     cal_corr(vertical_concat)
 
 if __name__ == "__main__":

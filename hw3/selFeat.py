@@ -63,29 +63,36 @@ def cal_corr(df):
     # Create a new dataframe using the correlation values and column names
     corrMat = pd.DataFrame(corrMat_list, columns=df.columns)
 
-    # Plot the correlation matrix as a heatmap
-    hm = sn.heatmap(data=corrMat)
-    plt.show()
-
     return corrMat
 
 
-
-
+#combine all values that are highly correlated
 def select_features(df):
     """
-    Select the features to keep
+    Select the features to keep based on correlation with a threshold
 
-    Parameters
-    ----------
+    Parameters:
     df : pandas dataframe
-        Training or test data 
-    Returns
-    -------
+        Training or test data
+
+    Returns:
     df : pandas dataframe
         The updated dataframe with a subset of the columns
     """
-    # TODO
+
+    # Calculate the correlation matrix
+    correlation_value = cal_corr(df)
+
+    keep_columns = set(df.columns)
+
+    for val1 in df.columns.values:
+        for val2 in df.columns.values:
+            if val1 != val2:
+                if correlation_value.at[val1, val2] >=.5:
+                    df.drop([val2], axis = 1, inplace = True)
+                elif correlation_value.at[val1, val2] <= -.5:
+                    df.drop([val2], axis = 1, inplace = True)
+    print(df.columns.values)
     return df
 
 
@@ -141,22 +148,6 @@ def main():
     # save it to csv
     xTrainTr.to_csv(args.outTrain, index=False)
     xTestTr.to_csv(args.outTest, index=False)
-
-    # # load the train and test data
-    # xTrain = pd.read_csv(args.trainFile)
-    # xTest = pd.read_csv(args.testFile)
-    # # # extract the new features
-    # # xNewTrain = extract_features(xTrain)
-    # # xNewTest = extract_features(xTest)
-    # # select the features
-    # xNewTrain = select_features(xTrain)
-    # xNewTest = select_features(xTest)
-    # # preprocess the data
-    # xTrainTr, xTestTr = preprocess_data(xNewTrain, xNewTest)
-    # # save it to csv
-    # xTrainTr.to_csv(args.outTrain, index=False)
-    # xTestTr.to_csv(args.outTest, index=False)
-
 
 if __name__ == "__main__":
     main()
