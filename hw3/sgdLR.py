@@ -58,6 +58,12 @@ class SgdLR(LinearRegression):
         xTrain = np.concatenate([xTrain, np.ones((len(xTrain), 1))], axis=-1)
         xTest = np.concatenate([xTest, np.ones((len(xTest), 1))], axis=-1)
 
+        # sample_size = int(0.4 * len(xTrain))
+        # selected_indices = np.random.choice(len(xTrain), sample_size, replace=False)
+        # xTrain = xTrain[selected_indices]
+        # yTrain = yTrain[selected_indices]
+
+
         n_samples, n_features = xTrain.shape
         self.beta = np.zeros(n_features)
         total_iterations = 0
@@ -101,11 +107,15 @@ class SgdLR(LinearRegression):
                     'train-mse': train_mse,
                     'test-mse': test_mse,
                 }
+            print(total_iterations)
             total_iterations += 1
 
             
         df = pd.DataFrame.from_dict(trainStats, orient="index")
         plt.plot(df)
+        plt.title("Learning rate of : 0.00000001", )
+        plt.xlabel("Epoch")
+        plt.ylabel("MSE")
         plt.show()
         return trainStats
 
