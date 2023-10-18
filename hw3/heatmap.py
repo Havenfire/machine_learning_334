@@ -70,7 +70,6 @@ def main():
     xTrain = pd.read_csv(args.trainFile)
     yTrain = pd.read_csv(args.yFile)
     vertical_concat = pd.concat([xTrain, yTrain], axis=1)
-    print(vertical_concat.head())
     cal_corr(vertical_concat)
 
 if __name__ == "__main__":

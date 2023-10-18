@@ -21,8 +21,8 @@ class StandardLR(LinearRegression):
         end_time = time.time()
 
         train_mse = self.mse(xTrain, yTrain)
-
         test_mse = self.mse(xTest, yTest)
+
         trainStats[0] = {
             "time": end_time - start_time,
             "train-mse": train_mse,

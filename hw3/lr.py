@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 from sklearn.metrics import mean_squared_error
-
+import numpy as np
 
 class LinearRegression(ABC):
     """
@@ -47,17 +47,12 @@ class LinearRegression(ABC):
             Predicted response per sample
         """
 
-        #PROBLEM IS IN BETA
-        print(self.beta, xFeat)
-        yHat = xFeat.dot(self.beta)
-
+        yHat = xFeat @ (self.beta)
         return yHat
 
     def mse(self, xFeat, y):
         """
         """
-
-
         yHat = self.predict(xFeat)
         return mean_squared_error(y, yHat)
 

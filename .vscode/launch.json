@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": ["new_xTrain.csv", "eng_yTrain.csv", "new_xTest.csv", "eng_yTest.csv", ".00001" , "1", "10"],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "C:/Users/bsliu/college-workspace/cs334/hw3"
+        }
+    ]
+}

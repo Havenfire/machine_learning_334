@@ -2,6 +2,9 @@ import argparse
 import numpy as np
 import pandas as pd
 import time
+import pdb
+import matplotlib.pyplot as plt
+
 
 from lr import LinearRegression, file_to_numpy
 
@@ -23,10 +26,17 @@ def grad_pt(beta, xi, yi):
         grad : 1d array with shape d
     """
 
+    b = xi.shape[0]
+
     #what the model thinks the hypothesis should be
-    h = np.dot(xi, beta)
+
+
     #calculates which direction to shift the model to the target
-    grad = np.dot(xi.transpose(), (h - yi))
+    hypothesis = np.matmul(xi, beta)
+    grad = (-2 / b) * (xi.T @ (yi - hypothesis))
+    grad = grad.reshape(len(grad),-1)
+
+
     return grad
 
 
@@ -43,42 +53,60 @@ class SgdLR(LinearRegression):
     def train_predict(self, xTrain, yTrain, xTest, yTest):
         """
         See definition in LinearRegression class
-        """
-        # TODO: DO SGD
-        
+        """        
+
+        xTrain = np.concatenate([xTrain, np.ones((len(xTrain), 1))], axis=-1)
+        xTest = np.concatenate([xTest, np.ones((len(xTest), 1))], axis=-1)
+
         n_samples, n_features = xTrain.shape
-        self.beta = np.zeros(n_features)  # Initialize beta with zeros
+        self.beta = np.zeros(n_features)
         total_iterations = 0
 
         trainStats = {}
         batch_num = n_samples // self.bs
         start = time.time()
+        
 
-        for epoch in range(1, self.mEpoch + 1):
+        for epoch in range(0, self.mEpoch):
+
+            if epoch == 0:
+                self.beta = np.random.rand(xTrain.shape[1],1)
             indices = np.arange(n_samples)
             np.random.shuffle(indices)
             xTrain_shuffled = xTrain[indices]
             yTrain_shuffled = yTrain[indices]
+           
+            cumulative_derivative = np.zeros((xTrain.shape[1],1))
 
             for batch in range(batch_num): 
-                start = batch * self.bs
-                end = (batch + 1) * self.bs
-                xi = xTrain_shuffled[start:end]
-                yi = yTrain_shuffled[start:end]
+                start_i = batch * self.bs
+                end_i = (batch + 1) * self.bs
+                xi = xTrain_shuffled[start_i:end_i]
+                yi = yTrain_shuffled[start_i:end_i]
 
-                self.beta = grad_pt(self.beta, xi, yi)
+
+                cumulative_derivative = cumulative_derivative + grad_pt(self.beta, xi, yi)
+                self.beta = self.beta - self.lr * (cumulative_derivative)
                 
-                total_iterations += 1
+
             end = time.time()
 
-            # print(xTrain, "\n\n", yTrain)
-            # print(xTrain.shape, "\n\n", yTrain.shape)
-            trainStats[total_iterations] = {
-                'time': end - start, 
-                'train-mse': self.mse(xTrain, yTrain),
-                'test-mse': self.mse(xTest, yTest)
-            }
 
+            train_mse = self.mse(xTrain, yTrain)
+            test_mse = self.mse(xTest, yTest)
+
+           
+            trainStats[total_iterations] = {
+                    'time': end - start, 
+                    'train-mse': train_mse,
+                    'test-mse': test_mse,
+                }
+            total_iterations += 1
+
+            
+        df = pd.DataFrame.from_dict(trainStats, orient="index")
+        plt.plot(df)
+        plt.show()
         return trainStats
 
 
