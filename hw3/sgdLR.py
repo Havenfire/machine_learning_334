@@ -4,7 +4,7 @@ import pandas as pd
 import time
 import pdb
 import matplotlib.pyplot as plt
-
+import standardLR as sLR
 
 from lr import LinearRegression, file_to_numpy
 
@@ -110,13 +110,48 @@ class SgdLR(LinearRegression):
             print(total_iterations)
             total_iterations += 1
 
-            
+
+            # Closed-form solution data
+        closed_form_data = {0: {'time': 0.043285369873046875, 'train-mse': 18.79604132972698, 'test-mse': 17.49307292751297}}
+
+        # Add the closed-form data to trainStats
+        # trainStats.update(closed_form_data)
+
         df = pd.DataFrame.from_dict(trainStats, orient="index")
-        plt.plot(df)
-        plt.title("Learning rate of : 0.00000001", )
-        plt.xlabel("Epoch")
-        plt.ylabel("MSE")
+
+        # Create a separate plot for training and test data
+        plt.figure(figsize=(10, 5))
+
+        # Training Data Plot
+        plt.subplot(1, 2, 1)
+        plt.plot(df['time'], df['train-mse'])
+        plt.xlabel("Total Time (seconds)")
+        plt.ylabel("Training MSE")
+        plt.title("Training MSE vs. Time")
+
+        # Plot the closed-form point without connecting lines
+        plt.plot(closed_form_data[0]['time'], closed_form_data[0]['train-mse'], color='red', marker='x', markersize=10, label='Closed Form')
+
+        # Test Data Plot
+        plt.subplot(1, 2, 2)
+        plt.plot(df['time'], df['test-mse'])
+        plt.xlabel("Total Time (seconds)")
+        plt.ylabel("Test MSE")
+        plt.title("Test MSE vs. Time")
+
+        # Plot the closed-form point without connecting lines
+        plt.plot(closed_form_data[0]['time'], closed_form_data[0]['test-mse'], color='red', marker='x', markersize=10, label='Closed Form')
+
+        plt.tight_layout()  # Ensures proper spacing of subplots
         plt.show()
+
+
+        # df = pd.DataFrame.from_dict(trainStats, orient="index")
+        # plt.plot(df)
+        # plt.title("Learning rate of : 0.001", )
+        # plt.xlabel("Epoch")
+        # plt.ylabel("MSE")
+        # plt.show()
         return trainStats
 
 

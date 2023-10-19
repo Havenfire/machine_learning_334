@@ -57,6 +57,7 @@ def main():
     model = StandardLR()
     trainStats = model.train_predict(xTrain, yTrain, xTest, yTest)
     print(trainStats)
+    return trainStats
 
 
 if __name__ == "__main__":
