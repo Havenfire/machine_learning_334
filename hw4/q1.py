@@ -14,7 +14,7 @@ def model_assessment(filename):
         data = file.read().splitlines()
 
     yTotal = [int(line.split()[0]) for line in data]
-    xTotal = [line[1:] for line in data]
+    xTotal = [''.join(line[1:]) for line in data]
 
     df = pd.DataFrame({'y': yTotal, 'text': xTotal})
     
@@ -22,7 +22,6 @@ def model_assessment(filename):
     selected_indices = np.random.choice(len(df), sample_size, replace=False)
     Train = df.loc[selected_indices]
     Test = df.drop(selected_indices)
-
     return Train, Test
 
 def build_vocab_map(traindf):
@@ -43,19 +42,22 @@ def build_vocab_map(traindf):
     vocab = {}
     word_list = []
 
-    for y, text in traindf.iterrows(): 
-        row_vocab = set()
-        for word in text:
-            row_vocab.add(word)
+    for text in traindf['text']:
 
-        for word in row_vocab:
+        words = text.split()
+        email_words = set()
+
+        for word in words:
             if word in vocab:
                 vocab[word] += 1
             else:
                 vocab[word] = 1
-    for word in vocab:
-        if vocab[word] >= 30:
-            word_list.append(word)
+
+            email_words.add(word)
+
+        for word in email_words:
+            if vocab[word] >= 30 and word not in word_list:
+                word_list.append(word)
 
     return vocab, word_list
 
@@ -78,6 +80,9 @@ def construct_binary(dataset, freq_words):
     ---output:
     numpy array
     """
+
+
+
     return None
 
 
