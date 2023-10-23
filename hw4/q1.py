@@ -25,24 +25,14 @@ def model_assessment(filename):
     return Train, Test
 
 def build_vocab_map(traindf):
-    """
-    Construct the vocabulary map such that it returns
-    (1) the vocabulary dictionary contains words as keys and
-    the number of emails the word appears in as values, and
-    (2) a list of words that appear in at least 30 emails.
-
-    ---input:
-    dataset: pandas dataframe containing the 'text' column
-             and 'y' label column
-
-    ---output:
-    dict: key-value is word-count pair
-    list: list of words that appear in at least 30 emails
-    """
     vocab = {}
     word_list = []
 
-    for text in traindf['text']:
+    for text_list in traindf['text']:
+        if isinstance(text_list, list):
+            text = ' '.join(text_list)
+        else:
+            text = text_list
 
         words = text.split()
         email_words = set()
@@ -58,8 +48,10 @@ def build_vocab_map(traindf):
         for word in email_words:
             if vocab[word] >= 30 and word not in word_list:
                 word_list.append(word)
+    word_list.sort()
 
     return vocab, word_list
+
 
 
 def construct_binary(dataset, freq_words):
@@ -81,9 +73,25 @@ def construct_binary(dataset, freq_words):
     numpy array
     """
 
+    complete_array = []
+    for text_list in dataset['text']:
+        if isinstance(text_list, list):
+            text = ' '.join(text_list)
+        else:
+            text = text_list 
 
+        email_words = set(text.split())
+        
+        binary_list = []
 
-    return None
+        for vocab in freq_words:
+            if vocab in email_words:
+                binary_list.append(1)
+            else:
+                binary_list.append(0)
+        complete_array.append(binary_list)
+        
+    return np.array(complete_array)
 
 
 def construct_count(dataset, freq_words):
@@ -104,7 +112,20 @@ def construct_count(dataset, freq_words):
     ---output:
     numpy array
     """
-    return None
+    complete_array = []
+    for text in dataset['text']:
+
+        if isinstance(text, list):
+            text = ' '.join(text)
+        else:
+            text = text 
+
+        email_word_count = text.split()
+        count_list = [email_word_count.count(word) for word in freq_words]
+
+        complete_array.append(count_list)
+
+    return np.array(complete_array)
 
 
 def main():
@@ -118,9 +139,9 @@ def main():
                         help="filename of the input data")
     args = parser.parse_args()
     Train, Test = model_assessment(args.data)
-    build_vocab_map(Train)
-    construct_binary()
-    construct_count()
+    vocab_dict, word_30 = build_vocab_map(Train)
+    construct_binary(Train, word_30)
+    construct_count(Train, word_30)
 
 
 
