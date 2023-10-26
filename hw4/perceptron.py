@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import time
+import q1
 
 class Perceptron(object):
     mEpoch = 1000  # maximum epoch size
@@ -52,8 +53,7 @@ class Perceptron(object):
 
     def predict(self, xFeat):
         """
-        Given the feature set xFeat, predict 
-        what class the values will have.
+        Given the feature set xFeat, predict what class the values will have.
 
         Parameters
         ----------
@@ -66,15 +66,16 @@ class Perceptron(object):
             Predicted response per sample
         """
         yHat = []
-        print(xFeat)
         for row in xFeat:
-            
-            if np.dot(row["y"], self.w) >= 0:
+            #need to process the row into features
+            prediction = np.dot(row, self.w)
+            if prediction >= 0:
                 yHat.append(1)
             else:
-                yHat.append(0)
+                yHat.append(-1)
 
         return yHat
+
 
 
 def transform_y(y):
@@ -179,6 +180,7 @@ def main():
     yTrain = file_to_numpy(args.yTrain)
     xTest = file_to_numpy(args.xTest)
     yTest = file_to_numpy(args.yTest)
+
     # transform to -1 and 1
     yTrain = transform_y(yTrain)
     yTest = transform_y(yTest)
