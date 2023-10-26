@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+import csv
 
 
 def model_assessment(filename):
@@ -124,19 +125,28 @@ def construct_count(dataset, freq_words):
 
 
 def main():
-    """
-    Main file to run from the command line.
-    """
-    # set up the program to take in arguments from the command line
     parser = argparse.ArgumentParser()
     parser.add_argument("--data",
                         default="spamAssassin.data",
                         help="filename of the input data")
     args = parser.parse_args()
     Train, Test = model_assessment(args.data)
+    
+    # Train['text'] = Train['text'].apply(lambda text: ' '.join(text))
+    # Test['text'] = Test['text'].apply(lambda text: ' '.join(text))
+    
+    # Train.to_csv('yTrain.csv', columns=['y'], index=False) 
+    # Train.to_csv('xTrain.csv', columns=['text'], index=False)
+    # Test.to_csv('yTest.csv', columns=['y'], index=False) 
+    # Test.to_csv('xTest.csv', columns=['text'], index=False) 
+
     vocab_dict, word_30 = build_vocab_map(Train)
     construct_binary(Train, word_30)
     construct_count(Train, word_30)
+
+if __name__ == "__main__":
+    main()
+
 
 
 

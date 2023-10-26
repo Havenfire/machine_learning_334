@@ -66,8 +66,9 @@ class Perceptron(object):
             Predicted response per sample
         """
         yHat = []
-
+        print(xFeat)
         for row in xFeat:
+            
             if np.dot(row["y"], self.w) >= 0:
                 yHat.append(1)
             else:
@@ -92,7 +93,7 @@ def transform_y(y):
         The true label but 0->-1
     """
 
-    new_y = [-1 if val == 0 else 1 for val in y]
+    new_y = np.where(y == 0, -1, 1)
 
     return new_y
 
