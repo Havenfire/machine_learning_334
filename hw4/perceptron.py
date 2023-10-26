@@ -66,6 +66,13 @@ class Perceptron(object):
             Predicted response per sample
         """
         yHat = []
+
+        for row in xFeat:
+            if np.dot(row["y"], self.w) >= 0:
+                yHat.append(1)
+            else:
+                yHat.append(0)
+
         return yHat
 
 
@@ -82,8 +89,12 @@ def transform_y(y):
     Returns
     -------
     y : numpy 1-d array with labels of -1 and 1
-        The true label but 0->1
+        The true label but 0->-1
     """
+
+    new_y = [-1 if val == 0 else 1 for val in y]
+
+    return new_y
 
 def calc_mistakes(yHat, yTrue):
     """
@@ -102,13 +113,15 @@ def calc_mistakes(yHat, yTrue):
     err : int
         The number of mistakes that are made
     """
-    mistakes = 0
+    err = 0
     for x1, x2 in zip(yHat, yTrue):
         if x1 != x2:
-            mistakes += 1
+            err += 1
+
+    
     
 
-    return mistakes
+    return err
 
 
 def file_to_numpy(filename):
