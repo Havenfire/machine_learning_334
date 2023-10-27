@@ -132,6 +132,8 @@ def main():
     args = parser.parse_args()
     Train, Test = model_assessment(args.data)
     
+    
+
     # Train['text'] = Train['text'].apply(lambda text: ' '.join(text))
     # Test['text'] = Test['text'].apply(lambda text: ' '.join(text))
     
@@ -141,12 +143,19 @@ def main():
     # Test.to_csv('xTest.csv', columns=['text'], index=False) 
 
     vocab_dict, word_30 = build_vocab_map(Train)
-    construct_binary(Train, word_30)
-    construct_count(Train, word_30)
+    
 
-if __name__ == "__main__":
-    main()
+    binary_train = construct_binary(Train, word_30)
+    binary_test = construct_binary(Test, word_30)
 
+    count_train = construct_count(Train, word_30)
+    count_test = construct_count(Test, word_30)
+
+
+    np.savetxt('binary_xTrain.csv', binary_train, delimiter=',', fmt='%d')
+    np.savetxt('binary_xTest.csv', binary_test, delimiter=',', fmt='%d')
+    np.savetxt('count_xTrain.csv', count_train, delimiter=',', fmt='%d')
+    np.savetxt('count_xTest.csv', count_test, delimiter=',', fmt='%d')
 
 
 
