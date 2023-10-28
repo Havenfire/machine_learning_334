@@ -28,6 +28,16 @@ class Perceptron(object):
             Keys represent the epochs and values the number of mistakes
         """
         stats = {}
+        self.w = np.zeros(xFeat.shape[1])
+
+        for epoch in range(self.mEpoch):
+            mistakes = 0
+            for xi, yi in zip(xFeat, y):
+                w_new, mistake = self.sample_update(xi, yi)
+                self.w = w_new
+                mistakes += mistake
+            stats[epoch] = mistakes
+        
         # TODO implement this
         return stats
 
@@ -49,7 +59,13 @@ class Perceptron(object):
             mistake: 0/1 
                 Was there a mistake made 
         """
-        return None, None
+
+        prediction = np.dot(xi, self.w)
+        if prediction * yi <= 0:
+            self.w += yi * xi
+            return self.w, 1
+        return self.w, 0
+
 
     def predict(self, xFeat):
         """
@@ -67,7 +83,7 @@ class Perceptron(object):
         """
         yHat = []
         for row in xFeat:
-            #need to process the row into features
+
             prediction = np.dot(row, self.w)
             if prediction >= 0:
                 yHat.append(1)
