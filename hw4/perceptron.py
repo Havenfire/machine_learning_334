@@ -33,12 +33,10 @@ class Perceptron(object):
         for epoch in range(self.mEpoch):
             mistakes = 0
             for xi, yi in zip(xFeat, y):
-                w_new, mistake = self.sample_update(xi, yi)
-                self.w = w_new
+                self.w, mistake = self.sample_update(xi, yi)
                 mistakes += mistake
             stats[epoch] = mistakes
         
-        # TODO implement this
         return stats
 
     def sample_update(self, xi, yi):
