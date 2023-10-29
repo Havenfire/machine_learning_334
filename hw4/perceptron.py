@@ -175,16 +175,13 @@ def tune_perceptron(trainx, trainy, epochList):
     """
     min_mistakes = 9223372036854775807
     optimal_epoch = 0
-    r_int = np.random
 
     k = 5
 
-    kf = KFold(n_splits=k, shuffle=True, random_state=r_int)
+    kf = KFold(n_splits=k, shuffle=True)
 
     for epoch in epochList:
-        np.random.seed(r_int)
         total_mistakes = 0
-
         for i, (train_index, val_index) in enumerate(kf.split(trainx, trainy)):
             train_x_fold, val_x_fold = trainx[train_index], trainx[val_index]
             train_y_fold, val_y_fold = trainy[train_index], trainy[val_index]
