@@ -137,9 +137,9 @@ def main():
     # Train['text'] = Train['text'].apply(lambda text: ' '.join(text))
     # Test['text'] = Test['text'].apply(lambda text: ' '.join(text))
     
-    # Train.to_csv('yTrain.csv', columns=['y'], index=False) 
+    Train.to_csv('yTrain.csv', columns=['y'], index=False) 
     # Train.to_csv('xTrain.csv', columns=['text'], index=False)
-    # Test.to_csv('yTest.csv', columns=['y'], index=False) 
+    Test.to_csv('yTest.csv', columns=['y'], index=False) 
     # Test.to_csv('xTest.csv', columns=['text'], index=False) 
 
     vocab_dict, word_30 = build_vocab_map(Train)

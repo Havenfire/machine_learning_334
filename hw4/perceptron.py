@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import time
 import q1
+from sklearn.model_selection import KFold
 
 class Perceptron(object):
     mEpoch = 1000  # maximum epoch size
@@ -13,7 +14,7 @@ class Perceptron(object):
 
     def train(self, xFeat, y):
         """
-        Train the perceptron using the data
+        Train the perceptron using the data. Should shuffle after each epoch
 
         Parameters
         ----------
@@ -30,8 +31,13 @@ class Perceptron(object):
         stats = {}
         self.w = np.zeros(xFeat.shape[1])
 
-        for epoch in range(self.mEpoch):
+        for epoch in range(1, self.mEpoch + 1):
             mistakes = 0
+
+            shuffled_indices = np.random.permutation(len(y))
+            xFeat = xFeat[shuffled_indices]
+            y = y[shuffled_indices]
+            
             for xi, yi in zip(xFeat, y):
                 self.w, mistake = self.sample_update(xi, yi)
                 mistakes += mistake
@@ -167,7 +173,35 @@ def tune_perceptron(trainx, trainy, epochList):
     epoch : int
         The optimal number of epochs
     """
-    return 0
+    min_mistakes = 9223372036854775807
+    optimal_epoch = 0
+    r_int = np.random
+
+    k = 5
+
+    kf = KFold(n_splits=k, shuffle=True, random_state=r_int)
+
+    for epoch in epochList:
+        np.random.seed(r_int)
+        total_mistakes = 0
+
+        for i, (train_index, val_index) in enumerate(kf.split(trainx, trainy)):
+            train_x_fold, val_x_fold = trainx[train_index], trainx[val_index]
+            train_y_fold, val_y_fold = trainy[train_index], trainy[val_index]
+
+            model = Perceptron(epoch)
+            trainStats = model.train(train_x_fold, train_y_fold)
+            num_mistakes = trainStats.get(epoch)
+            total_mistakes += num_mistakes
+
+        avg_mistakes = total_mistakes / k
+
+        if avg_mistakes < min_mistakes:
+            min_mistakes = avg_mistakes
+            optimal_epoch = epoch
+
+    return optimal_epoch
+
 
 
 def main():
