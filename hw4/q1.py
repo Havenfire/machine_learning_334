@@ -50,6 +50,7 @@ def build_vocab_map(traindf):
             if vocab[word] >= 30 and word not in word_list:
                 word_list.append(word)
 
+    
     return vocab, word_list
 
 
@@ -123,6 +124,15 @@ def construct_count(dataset, freq_words):
 
     return np.array(complete_array)
 
+def get_binary():
+    Train, Test = model_assessment('spamAssassin.data')
+    vocab_dict, word_30 = build_vocab_map(Train)
+    return vocab_dict
+
+def get_count():
+    Train, Test = model_assessment('spamAssassin.data')
+    vocab_dict, word_30 = build_vocab_map(Train)
+    return vocab_dict
 
 def main():
     parser = argparse.ArgumentParser()
@@ -137,13 +147,13 @@ def main():
     # Train['text'] = Train['text'].apply(lambda text: ' '.join(text))
     # Test['text'] = Test['text'].apply(lambda text: ' '.join(text))
     
-    Train.to_csv('yTrain.csv', columns=['y'], index=False) 
+    # Train.to_csv('yTrain.csv', columns=['y'], index=False) 
     # Train.to_csv('xTrain.csv', columns=['text'], index=False)
-    Test.to_csv('yTest.csv', columns=['y'], index=False) 
+    # Test.to_csv('yTest.csv', columns=['y'], index=False) 
     # Test.to_csv('xTest.csv', columns=['text'], index=False) 
 
     vocab_dict, word_30 = build_vocab_map(Train)
-    
+
 
     binary_train = construct_binary(Train, word_30)
     binary_test = construct_binary(Test, word_30)
@@ -151,12 +161,17 @@ def main():
     count_train = construct_count(Train, word_30)
     count_test = construct_count(Test, word_30)
 
+    # Train.to_csv('yTrain.csv', columns=['y'], index=False) 
+    # Test.to_csv('yTest.csv', columns=['y'], index=False) 
 
-    np.savetxt('binary_xTrain.csv', binary_train, delimiter=',', fmt='%d')
-    np.savetxt('binary_xTest.csv', binary_test, delimiter=',', fmt='%d')
-    np.savetxt('count_xTrain.csv', count_train, delimiter=',', fmt='%d')
-    np.savetxt('count_xTest.csv', count_test, delimiter=',', fmt='%d')
+    # np.savetxt('yTrain.csv', Train['y'], delimiter=',', fmt='%d')
+    # np.savetxt('yTest.csv', Test['y'], delimiter=',', fmt='%d')
 
+
+    # np.savetxt('binary_xTrain.csv', binary_train, delimiter=',', fmt='%d')
+    # np.savetxt('binary_xTest.csv', binary_test, delimiter=',', fmt='%d')
+    # np.savetxt('count_xTrain.csv', count_train, delimiter=',', fmt='%d')
+    # np.savetxt('count_xTest.csv', count_test, delimiter=',', fmt='%d')
 
 
 if __name__ == "__main__":

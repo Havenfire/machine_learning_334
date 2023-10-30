@@ -30,7 +30,6 @@ class Perceptron(object):
         """
         stats = {}
         self.w = np.zeros(xFeat.shape[1])
-
         for epoch in range(1, self.mEpoch + 1):
             mistakes = 0
 
@@ -140,9 +139,6 @@ def calc_mistakes(yHat, yTrue):
         if x1 != x2:
             err += 1
 
-    
-    
-
     return err
 
 
@@ -226,6 +222,12 @@ def main():
     xTest = file_to_numpy(args.xTest)
     yTest = file_to_numpy(args.yTest)
 
+    print(xTrain.shape[0])
+    print(xTrain.shape[1])
+    print(xTest.shape[0])
+    print(xTest.shape[1])
+    
+    
     # transform to -1 and 1
     yTrain = transform_y(yTrain)
     yTest = transform_y(yTest)
@@ -238,7 +240,26 @@ def main():
     # print out the number of mistakes
     print("Number of mistakes on the test dataset")
     print(calc_mistakes(yHat, yTest))
+    
 
+    vocab_dict = q1.get_binary()
+    binary_word_weights = [(word, weight) for word, weight in zip(vocab_dict, model.w)]
+
+    positive_words_binary = sorted(binary_word_weights, key=lambda x: x[1], reverse=True)[:15]
+    negative_words_binary = sorted(binary_word_weights, key=lambda x: x[1], reverse=False)[:15]
+
+    print("Top 15 Positive Words for Binary Dataset:")
+    for word, weight in positive_words_binary:
+        print(f"{word}: {weight}")
+
+    print("Top 15 Negative Words for Binary Dataset:")
+    for word, weight in negative_words_binary:
+        print(f"{word}: {weight}")
+
+
+    # epoch_list = list(range(65, args.epoch + 1, 1))
+    # optimal_epoch = tune_perceptron(xTrain, yTrain, epochList= epoch_list)
+    # print(optimal_epoch)
 
 if __name__ == "__main__":
     main()
