@@ -2,6 +2,9 @@ import argparse
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
 
 def generate_bootstrap(xTrain, yTrain):
     """
@@ -26,7 +29,16 @@ def generate_bootstrap(xTrain, yTrain):
         such that using this array on xTrain will yield a matrix 
         with only the out-of-bag samples (i.e., xTrain[oobIdx, :]).
     """
-    return None, None, None
+    n = xTrain.shape[0]
+
+    bootstrap_indices = np.random.choice(n, size=n, replace=True)
+    
+    xBoot = xTrain[bootstrap_indices]
+    yBoot = yTrain[bootstrap_indices]
+
+    oobIdx = [i for i in range(n) if i not in bootstrap_indices]
+
+    return xBoot, yBoot, oobIdx
 
 
 def generate_subfeat(xTrain, maxFeat):
@@ -49,7 +61,10 @@ def generate_subfeat(xTrain, maxFeat):
     featIdx: 1d array with shape maxFeat
         Array containing the subsample indices of features from xTrain
     """
-    return None, None
+
+    featIdx = np.random.choice(xTrain.shape[1], size=maxFeat, replace=False)
+    xSubfeat = xTrain[:,featIdx]
+    return xSubfeat, featIdx
 
 
 class RandomForest(object):
@@ -84,6 +99,7 @@ class RandomForest(object):
             Minimum number of samples in the decision tree
         """
         self.nest = nest
+        self.maxFeat = maxFeat
         self.criterion = criterion
         self.maxDepth = maxDepth
         self.minLeafSample = minLeafSample
@@ -105,7 +121,29 @@ class RandomForest(object):
             Keys represent the number of trees and
             the values are the out of bag errors
         """
-        return
+        stats = {}
+
+        for i in range(self.nest):
+            xBoot, yBoot, oobIdx = generate_bootstrap(xFeat, y)
+
+            xSubfeat, featIdx = generate_subfeat(xBoot, self.maxFeat)
+            dtc = DecisionTreeClassifier(criterion=self.criterion, max_depth=self.maxDepth, min_samples_leaf=self.minLeafSample)
+            dtc.fit(xSubfeat, yBoot)
+
+            oob = xFeat[oobIdx, :]
+            oob = oob[:, featIdx]
+            value_dict = {}
+            value_dict["feat"] = featIdx
+            value_dict["tree"] = dtc
+
+            self.model[i] = value_dict
+
+            yHat = dtc.predict(oob)
+            oob_error = 1.0 - accuracy_score(y[oobIdx], yHat)
+
+            stats[i] = oob_error
+
+        return stats
 
     def predict(self, xFeat):
         """
@@ -122,6 +160,9 @@ class RandomForest(object):
         yHat : 1d array or list with shape m
             Predicted response per sample
         """
+
+
+
         yHat = []
         return yHat
 
@@ -160,11 +201,13 @@ def main():
     yTest = file_to_numpy(args.yTest)
 
     np.random.seed(args.seed)   
-    model = RandomForest(args.epoch)
+
+    model = RandomForest(args.epoch, 5, "gini", 10, 2)
     trainStats = model.train(xTrain, yTrain)
     print(trainStats)
-    yHat = model.predict(xTest)
+    # yHat = model.predict(xTest)
 
+    generate_bootstrap(xTrain, yTrain)
 
 if __name__ == "__main__":
     main()
