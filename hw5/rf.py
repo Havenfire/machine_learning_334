@@ -4,7 +4,8 @@ import pandas as pd
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
-
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def generate_bootstrap(xTrain, yTrain):
     """
@@ -161,9 +162,16 @@ class RandomForest(object):
             Predicted response per sample
         """
 
+        yHat = np.zeros(xFeat.shape[0])
 
+        for i in range(self.nest):
+            featIdx = self.model[i]["feat"]
+            tree = self.model[i]["tree"]
 
-        yHat = []
+            xSmall = xFeat[:, featIdx]
+            yHat += tree.predict(xSmall)
+
+        yHat = (np.round(yHat / self.nest)).astype(int)
         return yHat
 
 
@@ -200,14 +208,36 @@ def main():
     xTest = file_to_numpy(args.xTest)
     yTest = file_to_numpy(args.yTest)
 
-    np.random.seed(args.seed)   
+    """
+    nest: Any,
+    maxFeat: int,
+    criterion: str,
+    maxDepth: int,
+    minLeafSample: int
+    """
 
-    model = RandomForest(args.epoch, 5, "gini", 10, 2)
+    # nest_values = range(1, 101)
+    # maxFeatures = range(1, 12)
+    # min_leaf_sample = range(2, 100)
+    # accuracy_scores = []
+    # for val in tqdm(min_leaf_sample, desc="Testing nests"):
+    #     model = RandomForest(50, 5, "gini", 10, val)
+    #     model.train(xTrain, yTrain)
+    #     yHat = model.predict(xTest)
+    #     accuracy_scores.append(accuracy_score(yTest, yHat))
+
+    # # Plot the accuracy scores
+    # plt.plot(min_leaf_sample, accuracy_scores, marker='o')
+    # plt.xlabel('Min_leaf_sample')
+    # plt.ylabel('Test Accuracy')
+    # plt.title('Effect of Min_leaf_sample on Test Accuracy')
+    # plt.show()
+
+    model = RandomForest(40, 8, "gini", 50, 1)
     trainStats = model.train(xTrain, yTrain)
+    yHat = model.predict(xTest)
+    print(accuracy_score(yTest, yHat))
     print(trainStats)
-    # yHat = model.predict(xTest)
-
-    generate_bootstrap(xTrain, yTrain)
 
 if __name__ == "__main__":
     main()
