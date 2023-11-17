@@ -5,6 +5,7 @@ from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
+from scipy.stats import mode
 from tqdm import tqdm
 
 def generate_bootstrap(xTrain, yTrain):
@@ -106,23 +107,8 @@ class RandomForest(object):
         self.minLeafSample = minLeafSample
 
     def train(self, xFeat, y):
-        """
-        Train the random forest using the data
-
-        Parameters
-        ----------
-        xFeat : nd-array with shape n x d
-            Training data 
-        y : 1d array with shape n
-            Array of responses associated with training data.
-
-        Returns
-        -------
-        stats : object
-            Keys represent the number of trees and
-            the values are the out of bag errors
-        """
         stats = {}
+        oobarr = np.full((self.nest, xFeat.shape[0]), False, dtype=bool)
 
         for i in range(self.nest):
             xBoot, yBoot, oobIdx = generate_bootstrap(xFeat, y)
@@ -130,18 +116,28 @@ class RandomForest(object):
             xSubfeat, featIdx = generate_subfeat(xBoot, self.maxFeat)
             dtc = DecisionTreeClassifier(criterion=self.criterion, max_depth=self.maxDepth, min_samples_leaf=self.minLeafSample)
             dtc.fit(xSubfeat, yBoot)
+            self.model[i] = {'tree': dtc, 'feat': featIdx}
 
             oob = xFeat[oobIdx, :]
             oob = oob[:, featIdx]
-            value_dict = {}
-            value_dict["feat"] = featIdx
-            value_dict["tree"] = dtc
 
-            self.model[i] = value_dict
+            oobarr[i, oobIdx] = True
 
-            yHat = dtc.predict(oob)
-            oob_error = 1.0 - accuracy_score(y[oobIdx], yHat)
+            preds = np.zeros((xFeat.shape[0], i + 1))
 
+            for j in range(i + 1):
+                if np.any(oobarr[j]):
+                    featIdx = self.model[j]['feat']
+                    dt = self.model[j]['tree']
+                    xSubfeat = xFeat[:, featIdx]
+                    preds[:, j] = dt.predict(xSubfeat)
+
+
+            non_zero_rows = np.any(preds != 0, axis=1)
+            yhat = mode(preds[non_zero_rows], axis=1, keepdims=True).mode.flatten()
+            yTrue = y[non_zero_rows]
+
+            oob_error = 1.0 - accuracy_score(yTrue, yhat)
             stats[i] = oob_error
 
         return stats
@@ -216,27 +212,29 @@ def main():
     minLeafSample: int
     """
 
-    # nest_values = range(1, 101)
+    # nest_values = range(1, 60)
     # maxFeatures = range(1, 12)
-    # min_leaf_sample = range(2, 100)
+    # maxDepth = range(5, 100)
+    # min_leaf_sample = range(2, 50)
+
     # accuracy_scores = []
-    # for val in tqdm(min_leaf_sample, desc="Testing nests"):
-    #     model = RandomForest(50, 5, "gini", 10, val)
+    # for val in tqdm(maxDepth, desc="Testing nests"):
+    #     model = RandomForest(50, 5, "gini", val, 2)
     #     model.train(xTrain, yTrain)
     #     yHat = model.predict(xTest)
     #     accuracy_scores.append(accuracy_score(yTest, yHat))
 
     # # Plot the accuracy scores
-    # plt.plot(min_leaf_sample, accuracy_scores, marker='o')
-    # plt.xlabel('Min_leaf_sample')
+    # plt.plot(maxDepth, accuracy_scores, marker='o')
+    # plt.xlabel('maxDepth')
     # plt.ylabel('Test Accuracy')
-    # plt.title('Effect of Min_leaf_sample on Test Accuracy')
+    # plt.title('Effect of maxDepth on Test Accuracy')
     # plt.show()
 
-    model = RandomForest(40, 8, "gini", 50, 1)
+    model = RandomForest(35, 5, "gini", 25, 2)  
     trainStats = model.train(xTrain, yTrain)
     yHat = model.predict(xTest)
-    print(accuracy_score(yTest, yHat))
+    print(1- accuracy_score(yTest, yHat))
     print(trainStats)
 
 if __name__ == "__main__":
